@@ -1,5 +1,7 @@
 import React, { useState } from "react";
+import AddItem from "./components/AddItem";
 import ItemList from "./components/ItemList";
+import { GlobalContext } from "./GlobalState";
 
 function getItems() {
   const items = [
@@ -57,13 +59,63 @@ function getItems() {
 }
 
 function App() {
-  const initialData = getItems();
+  let initialData = getItems();
+  initialData = initialData.map((item, index) => {
+    return { ...item, id: index };
+  });
   const [data, setData] = useState(initialData);
+  const [search, setSearch] = React.useState("");
+  const [searchedItems, setSearchedItems] = React.useState([]);
+  const [isSearchEmpty, setIsSearchEmpty] = React.useState(true);
+  const handleChange = (event) => {
+    let search = event.target.value;
+    setSearch(search);
+    if (search === "") isSearchEmpty = true;
+    setIsSearchEmpty(false);
+    let searchItems = [];
+    for (let item of data) {
+      console.log(data);
+      if (item.title.includes(search) || item.description.includes(search)) {
+        console.log(true);
+        searchedItems.push(item);
+      }
+    }
+    if (searchedItems.length <= 0) setIsSearchEmpty(true);
+    console.log(searchedItems);
+    setSearchedItems(searchItems);
+  };
+  const addItem = (item) => {
+    let copy = [...data];
+    copy.push(item);
+    setData(copy);
+  };
+  // edit an item
+  const editItem = (item) => {
+    let copy = [...data];
+    let index = copy.find((elem, index) => {
+      if (elem.id === item.id) return index;
+    });
+    copy[index] = item;
+    setData(copy);
+  };
+
+  const deleteItem = (id) => {
+    let items = data.filter((item) => item.id !== id);
+    setData(items);
+  };
 
   return (
-    <>
-      <ItemList data={data} />
-    </>
+    <GlobalContext.Provider
+      value={{ data, addItem, deleteItem, editItem, searchedItems }}
+    >
+      <AddItem />
+      <input name="serach" value={search} onChange={(e) => handleChange(e)} />
+      {isSearchEmpty ? (
+        <ItemList data={data} />
+      ) : (
+        <ItemList data={searchedItems} />
+      )}
+    </GlobalContext.Provider>
   );
 }
 

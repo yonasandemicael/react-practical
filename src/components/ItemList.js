@@ -1,12 +1,17 @@
-import React from "react";
 import Item from "./Item";
+import React, { useContext } from "react";
+import { GlobalContext } from "../GlobalState";
 
 export default function ItemList({ data }) {
+  const { searchedItems } = useContext(GlobalContext);
+  console.log(data);
+  console.log(searchedItems);
+
   return (
     <>
-      {data.map((item, index) => (
-        <Item data={item} key={index} />
-      ))}
+      {data && data.map((item, index) => <Item data={item} key={index} />)}
+      {searchedItems &&
+        searchedItems.map((item, index) => <Item data={item} key={index} />)}
     </>
   );
 }
